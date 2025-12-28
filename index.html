@@ -7,44 +7,67 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="app-header">
-    <div class="title">Valorant Training Tracker</div>
-    <div class="plan-tabs" id="planTabs"></div>
-  </header>
+  <div class="app">
+    <header class="top-bar">
+      <div class="app-title">Valorant Training Tracker</div>
+      <div class="app-meta" id="currentDate"></div>
+    </header>
 
-  <main class="app-main">
-    <section class="panel plan-panel">
-      <div class="panel-header">
-        <h2>Plan structure</h2>
-        <button class="btn" id="addExerciseBtn">Add exercise</button>
-      </div>
-      <div class="exercise-list" id="exerciseList"></div>
-    </section>
+    <section class="plan-tabs" id="planTabs"></section>
 
-    <section class="panel today-panel">
-      <div class="subtabs" id="rightTabs">
-        <button class="tab-btn active" data-tab="today">Today</button>
-        <button class="tab-btn" data-tab="progress">Progress</button>
-      </div>
-
-      <div class="tab-content" id="todayTab">
-        <div class="today-header" id="todayHeader"></div>
-        <div class="today-list" id="todayList"></div>
-        <div class="today-actions">
-          <button class="btn" id="saveTodayBtn">Save today</button>
-          <div class="summary" id="todaySummary"></div>
+    <main class="layout">
+      <section class="panel plan-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Plan structure</h2>
+            <p>Manage exercises for the current plan.</p>
+          </div>
+          <button class="btn" id="addExerciseBtn">Add exercise</button>
         </div>
-      </div>
+        <div class="exercise-list" id="exerciseList"></div>
+      </section>
 
-      <div class="tab-content hidden" id="progressTab">
-        <div class="progress-header">
-          <label for="progressSelect">Exercise</label>
-          <select id="progressSelect"></select>
+      <section class="panel right-panel">
+        <div class="subtabs" id="rightTabs">
+          <button class="tab-btn" data-tab="today">Today</button>
+          <button class="tab-btn" data-tab="progress">Progress</button>
         </div>
-        <div class="progress-body" id="progressBody"></div>
-      </div>
-    </section>
-  </main>
+
+        <div class="tab-content" id="todayTab">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Today</h2>
+                <p>Complete and log today's training for the current plan.</p>
+              </div>
+              <div class="today-date" id="todayHeader"></div>
+            </div>
+            <div class="today-list" id="todayList"></div>
+            <div class="today-actions">
+              <button class="btn primary" id="saveTodayBtn">Save today</button>
+              <div class="summary" id="todaySummary"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="progressTab">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h2>Progress</h2>
+                <p>Select an exercise to see recent history and averages.</p>
+              </div>
+              <div class="progress-select">
+                <label for="progressSelect">Exercise</label>
+                <select id="progressSelect"></select>
+              </div>
+            </div>
+            <div class="progress-body" id="progressBody"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script src="script.js"></script>
 </body>
