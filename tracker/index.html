@@ -11,9 +11,27 @@
       <section class="w-full md:w-5/12">
         <div class="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl">
           <div class="mb-4 flex items-center justify-between">
-            <div>
-              <p class="text-sm uppercase tracking-widest text-slate-400">Календарь</p>
-              <h1 id="monthLabel" class="text-2xl font-semibold text-slate-100"></h1>
+            <div class="flex flex-col gap-3">
+              <div class="flex flex-wrap gap-3 text-xs uppercase tracking-widest text-slate-400">
+                <label class="flex flex-col gap-1">
+                  <span>Год</span>
+                  <select
+                    id="yearSelect"
+                    class="rounded-lg border border-slate-800 bg-slate-950/60 px-2 py-1 text-sm text-slate-100 focus:border-red-500 focus:outline-none"
+                  ></select>
+                </label>
+                <label class="flex flex-col gap-1">
+                  <span>Месяц</span>
+                  <select
+                    id="monthSelect"
+                    class="rounded-lg border border-slate-800 bg-slate-950/60 px-2 py-1 text-sm text-slate-100 focus:border-red-500 focus:outline-none"
+                  ></select>
+                </label>
+              </div>
+              <div>
+                <p class="text-sm uppercase tracking-widest text-slate-400">Календарь</p>
+                <h1 id="monthLabel" class="text-2xl font-semibold text-slate-100"></h1>
+              </div>
             </div>
             <div class="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-red-300">
               Фокус Valorant
@@ -127,6 +145,8 @@
 
       const calendarGrid = document.getElementById("calendarGrid");
       const monthLabel = document.getElementById("monthLabel");
+      const yearSelect = document.getElementById("yearSelect");
+      const monthSelect = document.getElementById("monthSelect");
       const selectedDateLabel = document.getElementById("selectedDateLabel");
       const planList = document.getElementById("planList");
       const dailyNote = document.getElementById("dailyNote");
@@ -139,6 +159,25 @@
       let trainingPlan = loadTrainingPlan();
       let dayEntries = loadDayEntries();
       let selectedDate = getISODate(new Date());
+
+      const MONTHS_RU = [
+        "Январь",
+        "Февраль",
+        "Март",
+        "Апрель",
+        "Май",
+        "Июнь",
+        "Июль",
+        "Август",
+        "Сентябрь",
+        "Октябрь",
+        "Ноябрь",
+        "Декабрь",
+      ];
+
+      const today = new Date();
+      let currentYear = today.getFullYear();
+      let currentMonth = today.getMonth();
 
       function getDayCompletionStatus(dateString) {
         if (trainingPlan.length === 0) {
@@ -170,16 +209,13 @@
         }
       }
 
-      // Calendar rendering logic for the current month
+      // Calendar rendering logic for the selected month/year
       function renderCalendar() {
         calendarGrid.innerHTML = "";
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = today.getMonth();
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        // Используем русскую локаль для отображения месяца.
-        monthLabel.textContent = today.toLocaleDateString("ru-RU", {
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        // Используем русскую локаль для отображения месяца и года.
+        monthLabel.textContent = firstDay.toLocaleDateString("ru-RU", {
           month: "long",
           year: "numeric",
         });
@@ -192,7 +228,7 @@
         }
 
         for (let day = 1; day <= lastDay.getDate(); day += 1) {
-          const date = new Date(year, month, day);
+          const date = new Date(currentYear, currentMonth, day);
           const dateString = getISODate(date);
           const button = document.createElement("button");
           const hasEntry = Boolean(dayEntries[dateString]);
@@ -421,6 +457,46 @@
         });
       }
 
+      function populateSelectors() {
+        // Заполняем список годов и месяцев для управления календарем.
+        for (let year = 2020; year <= 2035; year += 1) {
+          const option = document.createElement("option");
+          option.value = String(year);
+          option.textContent = year;
+          yearSelect.appendChild(option);
+        }
+
+        MONTHS_RU.forEach((monthName, index) => {
+          const option = document.createElement("option");
+          option.value = String(index);
+          option.textContent = monthName;
+          monthSelect.appendChild(option);
+        });
+
+        yearSelect.value = String(currentYear);
+        monthSelect.value = String(currentMonth);
+      }
+
+      function syncSelectedDate(year, month) {
+        // Если выбранный день существует в новом месяце, сохраняем номер дня.
+        const selectedDay = new Date(`${selectedDate}T00:00:00`).getDate();
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        const nextDay = selectedDay <= lastDay ? selectedDay : 1;
+        selectedDate = getISODate(new Date(year, month, nextDay));
+      }
+
+      function handleSelectorChange() {
+        currentYear = Number(yearSelect.value);
+        currentMonth = Number(monthSelect.value);
+        syncSelectedDate(currentYear, currentMonth);
+        renderCalendar();
+        renderDayPanel();
+      }
+
+      yearSelect.addEventListener("change", handleSelectorChange);
+      monthSelect.addEventListener("change", handleSelectorChange);
+
+      populateSelectors();
       renderCalendar();
       renderDayPanel();
     </script>
