@@ -59,9 +59,30 @@
             </div>
             <span class="text-xs uppercase tracking-widest text-red-300">Трекер</span>
           </div>
+          <div class="mb-4 flex flex-wrap items-center gap-3 text-xs uppercase tracking-widest text-slate-400">
+            <span>Режим дня</span>
+            <div class="flex overflow-hidden rounded-full border border-slate-800 bg-slate-950/60">
+              <button
+                id="modeTraining"
+                type="button"
+                class="px-4 py-2 text-xs font-semibold uppercase tracking-widest transition"
+              >
+                Тренировка
+              </button>
+              <button
+                id="modeRest"
+                type="button"
+                class="px-4 py-2 text-xs font-semibold uppercase tracking-widest transition"
+              >
+                Отдых
+              </button>
+            </div>
+          </div>
           <div>
-            <h3 class="mb-3 text-sm uppercase tracking-widest text-slate-400">План тренировки</h3>
-            <ul id="planList" class="space-y-3"></ul>
+            <div id="trainingPanel">
+              <h3 class="mb-3 text-sm uppercase tracking-widest text-slate-400">План тренировки</h3>
+              <ul id="planList" class="space-y-3"></ul>
+            </div>
           </div>
           <div class="mt-6">
             <label for="dailyNote" class="text-sm uppercase tracking-widest text-slate-400">Заметка за день</label>
@@ -136,7 +157,7 @@
       // Data models
       /** @typedef {{ id: string, title: string, description?: string, durationMinutes?: number }} TrainingBlock */
       /** @typedef {TrainingBlock[]} TrainingPlan */
-      /** @typedef {{ date: string, completedBlockIds: string[], note: string }} DayEntry */
+      /** @typedef {{ date: string, completedBlockIds: string[], note: string, mode: "training" | "rest", results: Record<string, number[]> }} DayEntry */
 
       const STORAGE_KEYS = {
         plan: "valorantTrainingPlan",
@@ -151,6 +172,9 @@
       const planList = document.getElementById("planList");
       const dailyNote = document.getElementById("dailyNote");
       const saveDay = document.getElementById("saveDay");
+      const modeTraining = document.getElementById("modeTraining");
+      const modeRest = document.getElementById("modeRest");
+      const trainingPanel = document.getElementById("trainingPanel");
       const planForm = document.getElementById("planForm");
       const blockTitle = document.getElementById("blockTitle");
       const blockDescription = document.getElementById("blockDescription");
@@ -265,8 +289,10 @@
         selectedDateLabel.textContent = formatDisplayDate(selectedDate);
         const entry = getDayEntry(selectedDate);
         dailyNote.value = entry.note;
+        updateModeToggle(entry.mode);
 
         planList.innerHTML = "";
+        updateTrainingPanelState(entry.mode);
         if (trainingPlan.length === 0) {
           const emptyState = document.createElement("p");
           emptyState.className = "text-sm text-slate-500";
@@ -299,6 +325,41 @@
             info.appendChild(duration);
           }
 
+          const resultsWrapper = document.createElement("div");
+          resultsWrapper.className = "mt-3 flex flex-col gap-2";
+
+          const resultsLabel = document.createElement("label");
+          resultsLabel.className = "text-xs uppercase tracking-widest text-slate-400";
+          resultsLabel.textContent = "Результаты (через запятую)";
+
+          const resultsInput = document.createElement("input");
+          resultsInput.type = "text";
+          resultsInput.placeholder = "17, 21, 19, +";
+          resultsInput.className =
+            "w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-xs text-slate-100 focus:border-red-500 focus:outline-none";
+          const existingResults = entry.results[block.id] || [];
+          resultsInput.value = existingResults.join(", ");
+          resultsInput.disabled = entry.mode === "rest";
+
+          const statsText = document.createElement("p");
+          statsText.className = "text-xs text-slate-500";
+          statsText.textContent = buildStatsLabel(existingResults);
+
+          resultsInput.addEventListener("input", () => {
+            if (entry.mode === "rest") {
+              return;
+            }
+            const parsedResults = parseResultsInput(resultsInput.value);
+            entry.results[block.id] = parsedResults;
+            dayEntries[selectedDate] = entry;
+            statsText.textContent = buildStatsLabel(parsedResults);
+          });
+
+          resultsWrapper.appendChild(resultsLabel);
+          resultsWrapper.appendChild(resultsInput);
+          resultsWrapper.appendChild(statsText);
+          info.appendChild(resultsWrapper);
+
           const controls = document.createElement("div");
           controls.className = "flex flex-col items-end gap-2";
 
@@ -308,6 +369,7 @@
           const checkbox = document.createElement("input");
           checkbox.type = "checkbox";
           checkbox.checked = entry.completedBlockIds.includes(block.id);
+          checkbox.disabled = entry.mode === "rest";
           checkbox.className = "h-4 w-4 rounded border-slate-700 bg-slate-950 text-red-500 focus:ring-red-500";
           checkbox.addEventListener("change", () => {
             toggleBlockCompletion(block.id, checkbox.checked);
@@ -340,6 +402,8 @@
       saveDay.addEventListener("click", () => {
         const entry = getDayEntry(selectedDate);
         entry.note = dailyNote.value.trim();
+        entry.mode = getSelectedMode();
+        entry.results = entry.results || {};
         dayEntries[selectedDate] = entry;
         persistDayEntries();
         renderCalendar();
@@ -371,6 +435,9 @@
         trainingPlan = trainingPlan.filter((block) => block.id !== blockId);
         Object.values(dayEntries).forEach((entry) => {
           entry.completedBlockIds = entry.completedBlockIds.filter((id) => id !== blockId);
+          if (entry.results) {
+            delete entry.results[blockId];
+          }
         });
         persistTrainingPlan();
         persistDayEntries();
@@ -380,6 +447,9 @@
 
       function toggleBlockCompletion(blockId, isCompleted) {
         const entry = getDayEntry(selectedDate);
+        if (entry.mode === "rest") {
+          return;
+        }
         if (isCompleted) {
           if (!entry.completedBlockIds.includes(blockId)) {
             entry.completedBlockIds.push(blockId);
@@ -433,13 +503,85 @@
       }
 
       function getDayEntry(date) {
-        return (
-          dayEntries[date] || {
+        const entry = dayEntries[date];
+        if (!entry) {
+          return {
             date,
             completedBlockIds: [],
             note: "",
-          }
-        );
+            mode: "training",
+            results: {},
+          };
+        }
+        return {
+          date,
+          completedBlockIds: entry.completedBlockIds || [],
+          note: entry.note || "",
+          mode: entry.mode || "training",
+          results: entry.results || {},
+        };
+      }
+
+      // Поддержка нового режима дня (тренировка/отдых) с визуальным состоянием.
+      function updateModeToggle(mode) {
+        const isTraining = mode !== "rest";
+        modeTraining.className = `px-4 py-2 text-xs font-semibold uppercase tracking-widest transition ${
+          isTraining ? "bg-red-500/80 text-white" : "text-slate-400 hover:text-slate-200"
+        }`;
+        modeRest.className = `px-4 py-2 text-xs font-semibold uppercase tracking-widest transition ${
+          isTraining ? "text-slate-400 hover:text-slate-200" : "bg-slate-700/80 text-white"
+        }`;
+      }
+
+      function updateTrainingPanelState(mode) {
+        const isRest = mode === "rest";
+        trainingPanel.className = isRest ? "opacity-50 pointer-events-none" : "";
+      }
+
+      function getSelectedMode() {
+        return modeRest.classList.contains("bg-slate-700/80") ? "rest" : "training";
+      }
+
+      modeTraining.addEventListener("click", () => {
+        const entry = getDayEntry(selectedDate);
+        entry.mode = "training";
+        dayEntries[selectedDate] = entry;
+        updateModeToggle(entry.mode);
+        updateTrainingPanelState(entry.mode);
+        renderDayPanel();
+      });
+
+      modeRest.addEventListener("click", () => {
+        const entry = getDayEntry(selectedDate);
+        entry.mode = "rest";
+        dayEntries[selectedDate] = entry;
+        updateModeToggle(entry.mode);
+        updateTrainingPanelState(entry.mode);
+        renderDayPanel();
+      });
+
+      // Парсер результатов: берём только числовые значения из строки.
+      function parseResultsInput(value) {
+        return value
+          .split(",")
+          .map((token) => token.trim())
+          .map((token) => Number(token))
+          .filter((token) => Number.isFinite(token));
+      }
+
+      // Подсчёт статистики по результатам за день.
+      function buildStatsLabel(results) {
+        if (!results.length) {
+          return "Нет данных";
+        }
+        const min = Math.min(...results);
+        const max = Math.max(...results);
+        const avg = results.reduce((sum, value) => sum + value, 0) / results.length;
+        return `Мин: ${formatStatNumber(min)}, Макс: ${formatStatNumber(max)}, Среднее: ${formatStatNumber(avg)}`;
+      }
+
+      function formatStatNumber(value) {
+        return Number.isInteger(value) ? String(value) : value.toFixed(1);
       }
 
       function getISODate(date) {
