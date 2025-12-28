@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Valorant Training Tracker</title>
+    <title>Трекер тренировок Valorant</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="min-h-screen bg-slate-950 text-slate-100">
@@ -12,21 +12,21 @@
         <div class="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl">
           <div class="mb-4 flex items-center justify-between">
             <div>
-              <p class="text-sm uppercase tracking-widest text-slate-400">Monthly Calendar</p>
+              <p class="text-sm uppercase tracking-widest text-slate-400">Календарь</p>
               <h1 id="monthLabel" class="text-2xl font-semibold text-slate-100"></h1>
             </div>
             <div class="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-red-300">
-              Valorant Focus
+              Фокус Valorant
             </div>
           </div>
           <div class="grid grid-cols-7 gap-2 text-center text-xs uppercase tracking-widest text-slate-500">
-            <span>Sun</span>
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
+            <span>ПН</span>
+            <span>ВТ</span>
+            <span>СР</span>
+            <span>ЧТ</span>
+            <span>ПТ</span>
+            <span>СБ</span>
+            <span>ВС</span>
           </div>
           <div id="calendarGrid" class="mt-3 grid grid-cols-7 gap-2"></div>
         </div>
@@ -36,60 +36,60 @@
         <div class="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl">
           <div class="mb-4 flex items-center justify-between">
             <div>
-              <p class="text-sm uppercase tracking-widest text-slate-400">Daily Session</p>
+              <p class="text-sm uppercase tracking-widest text-slate-400">Тренировка за день</p>
               <h2 id="selectedDateLabel" class="text-xl font-semibold"></h2>
             </div>
-            <span class="text-xs uppercase tracking-widest text-red-300">Tracker</span>
+            <span class="text-xs uppercase tracking-widest text-red-300">Трекер</span>
           </div>
           <div>
-            <h3 class="mb-3 text-sm uppercase tracking-widest text-slate-400">Training Plan</h3>
+            <h3 class="mb-3 text-sm uppercase tracking-widest text-slate-400">План тренировки</h3>
             <ul id="planList" class="space-y-3"></ul>
           </div>
           <div class="mt-6">
-            <label for="dailyNote" class="text-sm uppercase tracking-widest text-slate-400">Daily Note</label>
+            <label for="dailyNote" class="text-sm uppercase tracking-widest text-slate-400">Заметка за день</label>
             <textarea
               id="dailyNote"
               rows="4"
               class="mt-2 w-full rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-sm text-slate-100 focus:border-red-500 focus:outline-none"
-              placeholder="What went well today? What needs work?"
+              placeholder="Что получилось сегодня? Что нужно улучшить?"
             ></textarea>
           </div>
           <button
             id="saveDay"
             class="mt-4 w-full rounded-lg bg-red-500/90 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-white hover:bg-red-400"
           >
-            Save
+            Сохранить
           </button>
         </div>
 
         <div class="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl">
           <div class="mb-4 flex items-center justify-between">
             <div>
-              <p class="text-sm uppercase tracking-widest text-slate-400">Training Plan Editor</p>
-              <h3 class="text-lg font-semibold">Build your routine</h3>
+              <p class="text-sm uppercase tracking-widest text-slate-400">Редактор плана</p>
+              <h3 class="text-lg font-semibold">Соберите свой план</h3>
             </div>
-            <span class="text-xs uppercase tracking-widest text-red-300">Edit</span>
+            <span class="text-xs uppercase tracking-widest text-red-300">Редактировать</span>
           </div>
           <form id="planForm" class="grid gap-4 md:grid-cols-3">
             <div class="md:col-span-1">
-              <label class="text-xs uppercase tracking-widest text-slate-400">Title</label>
+              <label class="text-xs uppercase tracking-widest text-slate-400">Название</label>
               <input
                 id="blockTitle"
                 class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm focus:border-red-500 focus:outline-none"
-                placeholder="Aim Practice"
+                placeholder="Тренировка аима"
                 required
               />
             </div>
             <div class="md:col-span-1">
-              <label class="text-xs uppercase tracking-widest text-slate-400">Description</label>
+              <label class="text-xs uppercase tracking-widest text-slate-400">Описание</label>
               <input
                 id="blockDescription"
                 class="mt-1 w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm focus:border-red-500 focus:outline-none"
-                placeholder="Range + bots"
+                placeholder="Полигон + боты"
               />
             </div>
             <div class="md:col-span-1">
-              <label class="text-xs uppercase tracking-widest text-slate-400">Duration (min)</label>
+              <label class="text-xs uppercase tracking-widest text-slate-400">Длительность (мин)</label>
               <input
                 id="blockDuration"
                 type="number"
@@ -103,12 +103,12 @@
                 class="w-full rounded-lg border border-red-500/50 bg-red-500/20 px-4 py-2 text-sm font-semibold uppercase tracking-widest text-red-200 hover:bg-red-500/30"
                 type="submit"
               >
-                Add Block
+                Добавить упражнение
               </button>
             </div>
           </form>
           <p class="mt-4 text-xs text-slate-500">
-            Tip: keep blocks short and focused for consistency.
+            Совет: делайте упражнения короткими и сфокусированными для стабильности.
           </p>
         </div>
       </section>
@@ -178,12 +178,15 @@
         const month = today.getMonth();
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
-        monthLabel.textContent = today.toLocaleDateString("en-US", {
+        // Используем русскую локаль для отображения месяца.
+        monthLabel.textContent = today.toLocaleDateString("ru-RU", {
           month: "long",
           year: "numeric",
         });
 
-        for (let i = 0; i < firstDay.getDay(); i += 1) {
+        // Неделя начинается с понедельника.
+        const firstDayOffset = (firstDay.getDay() + 6) % 7;
+        for (let i = 0; i < firstDayOffset; i += 1) {
           const spacer = document.createElement("div");
           calendarGrid.appendChild(spacer);
         }
@@ -231,7 +234,7 @@
         if (trainingPlan.length === 0) {
           const emptyState = document.createElement("p");
           emptyState.className = "text-sm text-slate-500";
-          emptyState.textContent = "No blocks yet. Add your first training block below.";
+          emptyState.textContent = "Пока нет упражнений. Добавьте первое упражнение ниже.";
           planList.appendChild(emptyState);
           return;
         }
@@ -256,7 +259,7 @@
           if (block.durationMinutes) {
             const duration = document.createElement("p");
             duration.className = "text-xs text-slate-500";
-            duration.textContent = `${block.durationMinutes} min`;
+            duration.textContent = `${block.durationMinutes} мин`;
             info.appendChild(duration);
           }
 
@@ -275,7 +278,7 @@
           });
 
           const checkboxText = document.createElement("span");
-          checkboxText.textContent = "Completed";
+          checkboxText.textContent = "Выполнено";
 
           label.appendChild(checkbox);
           label.appendChild(checkboxText);
@@ -283,7 +286,7 @@
           const deleteButton = document.createElement("button");
           deleteButton.type = "button";
           deleteButton.className = "text-xs uppercase tracking-widest text-red-300 hover:text-red-200";
-          deleteButton.textContent = "Delete";
+          deleteButton.textContent = "Удалить";
           deleteButton.addEventListener("click", () => {
             deleteBlock(block.id);
           });
@@ -409,7 +412,8 @@
 
       function formatDisplayDate(dateString) {
         const date = new Date(`${dateString}T00:00:00`);
-        return date.toLocaleDateString("en-US", {
+        // Русское форматирование даты для заголовка.
+        return date.toLocaleDateString("ru-RU", {
           weekday: "long",
           month: "long",
           day: "numeric",
