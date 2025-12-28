@@ -140,6 +140,36 @@
       let dayEntries = loadDayEntries();
       let selectedDate = getISODate(new Date());
 
+      function getDayCompletionStatus(dateString) {
+        if (trainingPlan.length === 0) {
+          return "none";
+        }
+
+        const entry = dayEntries[dateString];
+        if (!entry) {
+          return "none";
+        }
+
+        const validBlockIds = new Set(trainingPlan.map((block) => block.id));
+        const completedCount = entry.completedBlockIds.filter((id) => validBlockIds.has(id)).length;
+
+        if (completedCount === 0) {
+          return "none";
+        }
+        if (completedCount >= trainingPlan.length) {
+          return "complete";
+        }
+        return "partial";
+      }
+
+      function applyCalendarStatus(button, status) {
+        if (status === "complete") {
+          button.classList.add("ring-1", "ring-inset", "ring-emerald-400/70");
+        } else if (status === "partial") {
+          button.classList.add("ring-1", "ring-inset", "ring-amber-300/70");
+        }
+      }
+
       // Calendar rendering logic for the current month
       function renderCalendar() {
         calendarGrid.innerHTML = "";
@@ -163,6 +193,7 @@
           const dateString = getISODate(date);
           const button = document.createElement("button");
           const hasEntry = Boolean(dayEntries[dateString]);
+          const completionStatus = getDayCompletionStatus(dateString);
 
           button.type = "button";
           button.textContent = day;
@@ -177,6 +208,8 @@
           } else {
             button.classList.add("bg-slate-950/40", "text-slate-400");
           }
+
+          applyCalendarStatus(button, completionStatus);
 
           button.addEventListener("click", () => {
             selectedDate = dateString;
@@ -292,6 +325,7 @@
         persistTrainingPlan();
         planForm.reset();
         renderDayPanel();
+        renderCalendar();
       });
 
       function deleteBlock(blockId) {
@@ -315,6 +349,8 @@
           entry.completedBlockIds = entry.completedBlockIds.filter((id) => id !== blockId);
         }
         dayEntries[selectedDate] = entry;
+        persistDayEntries();
+        renderCalendar();
       }
 
       // Local storage helpers
