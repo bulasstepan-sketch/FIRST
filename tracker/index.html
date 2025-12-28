@@ -377,15 +377,20 @@
           chartTitle.className = "text-xs uppercase tracking-widest text-slate-400";
           chartTitle.textContent = "Последние 10 тренировок";
 
+          // Высота графика контролируется контейнером, чтобы не растягивать блоки.
+          const chartContainer = document.createElement("div");
+          chartContainer.className = "mt-2 w-full max-w-full h-60 max-h-[40vh]";
+
           const chartCanvas = document.createElement("canvas");
-          chartCanvas.className = "mt-2 h-28 w-full";
+          chartCanvas.className = "h-full w-full";
 
           const chartEmptyText = document.createElement("p");
           chartEmptyText.className = "mt-2 text-xs text-slate-500";
           chartEmptyText.textContent = "Недостаточно данных для построения графика";
 
           chartPanel.appendChild(chartTitle);
-          chartPanel.appendChild(chartCanvas);
+          chartContainer.appendChild(chartCanvas);
+          chartPanel.appendChild(chartContainer);
           chartPanel.appendChild(chartEmptyText);
 
           let chartInstance = null;
@@ -433,6 +438,7 @@
               },
               options: {
                 responsive: true,
+                // Размер задаётся контейнером, поэтому отключаем сохранение пропорций.
                 maintainAspectRatio: false,
                 plugins: {
                   legend: { display: false },
