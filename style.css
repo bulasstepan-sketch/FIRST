@@ -1,0 +1,166 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #000;
+}
+
+body {
+  background: #fff;
+  padding: 16px;
+}
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #d9d9d9;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.plan-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tab-btn,
+.btn {
+  background: #fff;
+  border: 1px solid #bdbdbd;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.tab-btn.active {
+  border-bottom: 2px solid #000;
+}
+
+.app-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.panel {
+  border: 1px solid #d9d9d9;
+  padding: 12px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.panel h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.exercise-list,
+.today-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.exercise-item,
+.today-item {
+  border: 1px solid #e0e0e0;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.exercise-item {
+  grid-template-columns: 1fr;
+}
+
+.exercise-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.exercise-actions,
+.today-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  border: 1px solid #bdbdbd;
+  padding: 6px 8px;
+  font-size: 13px;
+  width: 100%;
+  background: #fff;
+}
+
+.today-header {
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.today-item {
+  grid-template-columns: 22px 1fr;
+  align-items: start;
+}
+
+.today-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.summary {
+  font-size: 12px;
+  color: #444;
+}
+
+.subtabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tab-content.hidden {
+  display: none;
+}
+
+.progress-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.progress-body {
+  font-size: 13px;
+  display: grid;
+  gap: 6px;
+}
+
+@media (max-width: 900px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+}
