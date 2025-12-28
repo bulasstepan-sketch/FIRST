@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Трекер тренировок Valorant</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body class="min-h-screen bg-slate-950 text-slate-100">
     <main class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 md:flex-row">
@@ -363,6 +364,93 @@
           comparisonText.className = "text-xs text-slate-500";
           comparisonText.textContent = buildComparisonLabel(block.id, selectedDate, existingResults);
 
+          const chartToggle = document.createElement("button");
+          chartToggle.type = "button";
+          chartToggle.className =
+            "mt-2 text-xs uppercase tracking-widest text-red-300 hover:text-red-200";
+          chartToggle.textContent = "Показать график";
+
+          const chartPanel = document.createElement("div");
+          chartPanel.className = "mt-2 hidden rounded-lg border border-slate-800 bg-slate-950/60 p-3";
+
+          const chartTitle = document.createElement("p");
+          chartTitle.className = "text-xs uppercase tracking-widest text-slate-400";
+          chartTitle.textContent = "Последние 10 тренировок";
+
+          const chartCanvas = document.createElement("canvas");
+          chartCanvas.className = "mt-2 h-28 w-full";
+
+          const chartEmptyText = document.createElement("p");
+          chartEmptyText.className = "mt-2 text-xs text-slate-500";
+          chartEmptyText.textContent = "Недостаточно данных для построения графика";
+
+          chartPanel.appendChild(chartTitle);
+          chartPanel.appendChild(chartCanvas);
+          chartPanel.appendChild(chartEmptyText);
+
+          let chartInstance = null;
+
+          // Инициализируем и обновляем график, пересчитывая набор данных для блока.
+          function refreshBlockChart() {
+            const series = buildBlockChartSeries(block.id);
+            if (series.labels.length === 0) {
+              chartTitle.classList.add("hidden");
+              chartCanvas.classList.add("hidden");
+              chartEmptyText.classList.remove("hidden");
+              if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+              }
+              return;
+            }
+
+            chartTitle.classList.remove("hidden");
+            chartCanvas.classList.remove("hidden");
+            chartEmptyText.classList.add("hidden");
+
+            if (chartInstance) {
+              chartInstance.data.labels = series.labels;
+              chartInstance.data.datasets[0].data = series.data;
+              chartInstance.update();
+              return;
+            }
+
+            const ctx = chartCanvas.getContext("2d");
+            chartInstance = new Chart(ctx, {
+              type: "line",
+              data: {
+                labels: series.labels,
+                datasets: [
+                  {
+                    data: series.data,
+                    borderColor: "rgba(244, 63, 94, 0.9)",
+                    backgroundColor: "rgba(244, 63, 94, 0.2)",
+                    pointRadius: 3,
+                    tension: 0.35,
+                    fill: true,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                },
+                scales: {
+                  x: {
+                    ticks: { color: "#94a3b8", maxRotation: 0 },
+                    grid: { color: "rgba(148, 163, 184, 0.1)" },
+                  },
+                  y: {
+                    ticks: { color: "#94a3b8" },
+                    grid: { color: "rgba(148, 163, 184, 0.1)" },
+                  },
+                },
+              },
+            });
+          }
+
           resultsInput.addEventListener("input", () => {
             if (entry.mode === "rest") {
               return;
@@ -373,13 +461,30 @@
             statsText.textContent = buildStatsLabel(parsedResults);
             comparisonText.textContent = buildComparisonLabel(block.id, selectedDate, parsedResults);
             renderGlobalStats();
+            if (!chartPanel.classList.contains("hidden")) {
+              refreshBlockChart();
+            }
           });
 
           resultsWrapper.appendChild(resultsLabel);
           resultsWrapper.appendChild(resultsInput);
           resultsWrapper.appendChild(statsText);
           resultsWrapper.appendChild(comparisonText);
+          resultsWrapper.appendChild(chartToggle);
+          resultsWrapper.appendChild(chartPanel);
           info.appendChild(resultsWrapper);
+
+          chartToggle.addEventListener("click", () => {
+            const isHidden = chartPanel.classList.contains("hidden");
+            if (isHidden) {
+              chartPanel.classList.remove("hidden");
+              chartToggle.textContent = "Скрыть график";
+              refreshBlockChart();
+              return;
+            }
+            chartPanel.classList.add("hidden");
+            chartToggle.textContent = "Показать график";
+          });
 
           const controls = document.createElement("div");
           controls.className = "flex flex-col items-end gap-2";
@@ -625,6 +730,37 @@
 
         const deltaPercent = ((avgToday - avgLast10) / avgLast10) * 100;
         return `Сравнение с последними 10 тренировками: ${formatPercentDelta(deltaPercent)}`;
+      }
+
+      function buildBlockChartSeries(blockId) {
+        const entriesWithAverages = getAllDayEntries()
+          .map((entry) => {
+            const results = entry.results?.[blockId];
+            if (!Array.isArray(results)) {
+              return null;
+            }
+            const numericResults = results.filter((value) => Number.isFinite(value));
+            if (numericResults.length === 0) {
+              return null;
+            }
+            const avg = numericResults.reduce((sum, value) => sum + value, 0) / numericResults.length;
+            return { date: entry.date, avg };
+          })
+          .filter(Boolean)
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        // Собираем дни с данными по блоку, сортируем по дате и берём последние 10.
+        const lastTenEntries = entriesWithAverages.slice(-10);
+
+        return {
+          labels: lastTenEntries.map((entry) => formatChartDateLabel(entry.date)),
+          data: lastTenEntries.map((entry) => entry.avg),
+        };
+      }
+
+      function formatChartDateLabel(dateString) {
+        const date = new Date(`${dateString}T00:00:00`);
+        return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" });
       }
 
       function formatPercentDelta(value) {
