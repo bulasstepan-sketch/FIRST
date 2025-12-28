@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valorant Training Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="title">Valorant Training Tracker</div>
+    <div class="plan-tabs" id="planTabs"></div>
+  </header>
+
+  <main class="app-main">
+    <section class="panel plan-panel">
+      <div class="panel-header">
+        <h2>Plan structure</h2>
+        <button class="btn" id="addExerciseBtn">Add exercise</button>
+      </div>
+      <div class="exercise-list" id="exerciseList"></div>
+    </section>
+
+    <section class="panel today-panel">
+      <div class="subtabs" id="rightTabs">
+        <button class="tab-btn active" data-tab="today">Today</button>
+        <button class="tab-btn" data-tab="progress">Progress</button>
+      </div>
+
+      <div class="tab-content" id="todayTab">
+        <div class="today-header" id="todayHeader"></div>
+        <div class="today-list" id="todayList"></div>
+        <div class="today-actions">
+          <button class="btn" id="saveTodayBtn">Save today</button>
+          <div class="summary" id="todaySummary"></div>
+        </div>
+      </div>
+
+      <div class="tab-content hidden" id="progressTab">
+        <div class="progress-header">
+          <label for="progressSelect">Exercise</label>
+          <select id="progressSelect"></select>
+        </div>
+        <div class="progress-body" id="progressBody"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
